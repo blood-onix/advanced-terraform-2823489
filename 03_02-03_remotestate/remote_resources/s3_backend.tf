@@ -9,7 +9,9 @@ variable "bucket_name" {
   default = "1313-tfstate"
 }
 
-variable "region" {}
+variable "region" {
+  default = "eu-central-1"
+}
 
 
 # //////////////////////////////
