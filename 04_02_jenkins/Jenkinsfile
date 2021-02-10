@@ -6,9 +6,9 @@ node {
     }
     stage('Download') {
         // Download Terraform
-        sh label: '', script: 'curl https://releases.hashicorp.com/terraform/0.12.29/terraform_0.12.29_linux_amd64.zip \
-            --output terraform_0.12.29_darwin_amd64.zip \
-             && unzip terraform_0.12.29_darwin_amd64.zip'
+        sh label: '', script: 'curl https://releases.hashicorp.com/terraform/0.14.6/terraform_0.14.6_linux_amd64.zip \
+            --output terraform_0.14.6_darwin_amd64.zip \
+             && unzip terraform_0.14.6_darwin_amd64.zip'
     }
     stage('Backend-Init') {
         // Initialize the Terraform configuration
@@ -44,7 +44,7 @@ node {
                                 sh script: '../terraform init \
                                             -backend-config="bucket=bloodterra-tfstate" \
                                             -backend-config="key=bloodterra/jenkinstst/app.state" \
-                                            -backend-config="eu-central-1" \
+                                            -backend-config="region=eu-central-1" \
                                             -backend-config="dynamodb_table=bloodterra-tfstatelock" \
                                             -backend-config="access_key=$aws_access_key" \
                                             -backend-config="secret_key=$aws_secret_key"'
@@ -59,6 +59,7 @@ node {
                                 sh script: '../terraform plan \
                                             -out s1.tfplan \
                                             -var="aws_access_key=$aws_access_key" \
+                                            -var="region=eu-central-1" \
                                             -var="aws_secret_key=$aws_secret_key"'
                             }
         }
@@ -72,7 +73,7 @@ node {
                             }
         }
     }
-    stage('Destroy'){
+     stage('Destroy'){
         input 'Destroy?'
         withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
                         string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key')]) {
@@ -89,5 +90,13 @@ node {
                         -var="aws_secret_key=$aws_secret_key"'
             }
         }
+    } 
+    post {
+    success {
+      mail to: "blood-onix@yandex.ru", subject:"SUCCESS: ${currentBuild.fullDisplayName}", body: "Yay, we passed."
+    }
+    failure {
+      mail to: "blood-onix@yandex.ru", subject:"FAILURE: ${currentBuild.fullDisplayName}", body: "Boo, we failed."
+    }
     }
 }

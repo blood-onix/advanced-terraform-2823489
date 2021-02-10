@@ -13,7 +13,9 @@ variable "aws_access_key" {}
 
 variable "aws_secret_key" {}
 
-variable "region" {}
+variable "region" {
+  default = "eu-central-1"
+}
 
 variable "vpc_cidr" {
   default = "172.16.0.0/16"
